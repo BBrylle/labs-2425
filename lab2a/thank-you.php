@@ -1,20 +1,54 @@
 <?php
-
 require "helpers/helper-functions.php";
-
 session_start();
 
+$fullname = $_POST['fullname'];
+$birthdate = $_POST['birthdate'];
 $contact_number = $_POST['contact_number'];
+$sex = $_POST['sex'];
 $program = $_POST['program'];
-$agree = $_POST['agree'];
+$address = $_POST['address'];
+$email = $_POST['email'];
+$password = $_POST['password'];
+$agree = isset($_POST['agree']) ? 'Yes' : 'No';
 
+$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+function calculateAge($birthdate) {
+    $birthDate = new DateTime($birthdate);
+    $currentDate = new DateTime();
+    $age = $birthDate->diff($currentDate)->y;
+    return $age;
+}
+
+$age = calculateAge($birthdate);
+
+$_SESSION['fullname'] = $fullname;
+$_SESSION['birthdate'] = $birthdate;
 $_SESSION['contact_number'] = $contact_number;
+$_SESSION['sex'] = $sex;
 $_SESSION['program'] = $program;
-$_SESSION['agree'] = $agree;
+$_SESSION['address'] = $address;
+$_SESSION['email'] = $email;
+$_SESSION['age'] = $age;
 
-$form_data = $_SESSION;
+$csvFilePath = '../lab2b/registrant.csv';
 
-dump_session();
+
+$file = fopen($csvFilePath, 'a');
+
+fputcsv($file, [
+    $fullname,
+    $birthdate,
+    $age,
+    $contact_number,
+    $sex,
+    $program,
+    $address,
+    $email
+]);
+
+fclose($file);
 
 session_destroy();
 ?>
@@ -31,12 +65,11 @@ session_destroy();
   <div class="row--50-50-on-large">
     <div class="col">
       <div class="p-section--shallow">
-        <h1>
-          Thank You Page
-        </h1>
+        <h1>Thank You!</h1>
       </div>
       <div class="p-section--shallow">
-      
+        <p>Your registration has been successfully submitted.</p>
+
         <table aria-label="Session Data">
             <thead>
                 <tr>
@@ -46,21 +79,26 @@ session_destroy();
             </thead>
             <tbody>
             <?php
-            foreach ($form_data as $key => $val):
+            foreach ($_SESSION as $key => $val):
             ?>
                 <tr>
-                    <th><?php echo $key; ?></th>
-                    <td>
-                      <?php echo $val; ?>
-                    </td>
+                    <th><?php echo htmlspecialchars($key); ?></th>
+                    <td><?php echo htmlspecialchars($val); ?></td>
                 </tr>
             <?php
             endforeach;
             ?>
+                <tr>
+                    <th>Age</th>
+                    <td><?php echo htmlspecialchars($age); ?></td>
+                </tr>
             </tbody>
         </table>
-      
-
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-image-container--3-2 is-cover">
+        <img class="p-image-container__image" src="https://www.auf.edu.ph/home/images/ittc.jpg" alt="">
       </div>
     </div>
   </div>
